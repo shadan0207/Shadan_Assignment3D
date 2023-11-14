@@ -11,8 +11,11 @@ public class DragandDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public GameObject build;
 
-    private Image image; // Assuming you are using UnityEngine.UI.Image
+    public Image image;
     private CanvasGroup canvasGroup; // For handling visibility
+
+    private Vector3 initialPosition;
+    private Vector3 offsetPosition; // Added variable to store the offset
 
 
     private void Start()
@@ -20,61 +23,41 @@ public class DragandDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         rectTransform = GetComponent<RectTransform>();
         image = GetComponent<Image>();
         canvasGroup = GetComponent<CanvasGroup>();
+        initialPosition = rectTransform.position;
 
-        image.SetEnabled(false); 
-        
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         isDragging = true;
 
-        // Show the image when dragging starts
-        image.SetEnabled(true);
-
         // Disable interaction with the UI element while dragging
         canvasGroup.blocksRaycasts = false;
+        
+        offsetPosition = rectTransform.position - Camera.main.ScreenToWorldPoint(eventData.position);
 
     }
-
-    /* public void OnPointerUp(PointerEventData eventData)
-     {
-         isDragging = false;
-
-         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-         RaycastHit hit;
-         //Debug.Log("ray started");
-
-         if (Physics.Raycast(ray, out hit))
-         {
-             if (hit.collider.CompareTag("Ground"))
-             {
-                  Vector3 newPosition = hit.point;
-
-                 GameObject school = Instantiate(build, newPosition, Quaternion.identity);
-             }
-         }
-     }*/
 
     public void OnPointerUp(PointerEventData eventData)
     {
         isDragging = false;
+        rectTransform.position = initialPosition+ offsetPosition;
+
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit))
         {
-            if (hit.collider.CompareTag("Ground"))
+            if (hit.collider.CompareTag("Ground") || hit.collider.CompareTag("Road"))
             {
                 Vector3 newPosition = SnapToGrid(hit.point);
-                GameObject school = Instantiate(build, newPosition, Quaternion.identity);
-
-                // Hide the image after placement
-                image.SetEnabled(false);
-
+                Vector3 offset = new Vector3(0, 0.05f, 0);
+                GameObject school = Instantiate(build, newPosition + offset, Quaternion.identity);
+                
                 // Enable interaction with the UI element again
                 canvasGroup.blocksRaycasts = true;
+                
             }
         }
     }
@@ -97,4 +80,6 @@ public class DragandDrop : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             rectTransform.anchoredPosition += eventData.delta;
         }
     }
+
+    
 }
