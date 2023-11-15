@@ -7,7 +7,7 @@ public class Exit : MonoBehaviour
     
     private void Start()
     {
-        // Attach the button click event
+        
         Button exitButton = GetComponent<Button>();
         if (exitButton != null)
         {
@@ -17,7 +17,7 @@ public class Exit : MonoBehaviour
 
     private void ExitButtonClick()
     {
-        // This function will be called when the button is clicked
+        
         Debug.Log("Exit button clicked");
 
         // Call the function to exit the application
